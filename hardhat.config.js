@@ -1,6 +1,18 @@
-require("@nomicfoundation/hardhat-toolbox");
+const fs = require('fs');
 
-/** @type import('hardhat/config').HardhatUserConfig */
+require('@nomiclabs/hardhat-waffle');
+
+const privateKey = fs.readFileSync('.secret').toString().trim();
+
 module.exports = {
-  solidity: "0.8.17",
+  networks: {
+    hardhat: {
+      chainId: 1337,
+    },
+    // matic: {
+    //   url: 'https://rpc-mumbai.maticvigil.com',
+    //   accounts: [privateKey],
+    // },
+  },
+  solidity: '0.8.4',
 };
