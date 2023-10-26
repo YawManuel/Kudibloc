@@ -6,27 +6,35 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 
-async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
-
-  const lockedAmount = hre.ethers.parseEther("0.001");
-
-  const lock = await hre.ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
-
-  await lock.waitForDeployment();
-
-  console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
-  );
+const tokens = (n) => {
+  return ethers.utils.parseUnits(n.toString(), 'ether')
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
+async function main() {
+  // Setup accounts & variables
+  const [deployer] = await ethers.getSigners()
+  const NAME = "ETH Daddy"
+  const SYMBOL = "ETHD"
+
+  // Deploy contract
+  const ETHDaddy = await ethers.getContractFactory("ETHDaddy")
+  const ethDaddy = await ETHDaddy.deploy(NAME, SYMBOL)
+  await ethDaddy.deployed();
+
+  console.log(`Deployed Domain Contract at: ${ethDaddy.address}\n`)
+
+  // List 6 domains
+  const names = ["jack.eth", "john.eth", "henry.eth", "cobalt.eth", "oxygen.eth", "carbon.eth"]
+  const costs = [tokens(10), tokens(25), tokens(15), tokens(2.5), tokens(3), tokens(1)]
+
+  for (var i = 0; i < 6; i++) {
+    const transaction = await ethDaddy.connect(deployer).list(names[i], costs[i])
+    await transaction.wait()
+
+    console.log(`Listed Domain ${i + 1}: ${names[i]}`)
+  }
+}
+
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
